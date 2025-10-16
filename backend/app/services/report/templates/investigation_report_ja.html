@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - 調査レポート</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: "Noto Sans JP", "MS PGothic", sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #0ea5e9;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #0ea5e9;
+            font-size: 24pt;
+            margin: 0 0 10px 0;
+        }
+        
+        .header .subtitle {
+            font-size: 14pt;
+            color: #666;
+        }
+        
+        .metadata {
+            background-color: #f0f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .metadata table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .metadata td {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .metadata td:first-child {
+            font-weight: bold;
+            width: 30%;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #0ea5e9;
+            font-size: 16pt;
+            border-bottom: 2px solid #0ea5e9;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .section h3 {
+            color: #333;
+            font-size: 12pt;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .risk-high { background-color: #ef4444; }
+        .risk-medium { background-color: #f59e0b; }
+        .risk-low { background-color: #22c55e; }
+        .risk-none { background-color: #64748b; }
+        
+        .findings-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .findings-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9fafb;
+            border-left: 4px solid #0ea5e9;
+        }
+        
+        .pattern-card {
+            background-color: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .pattern-card h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .signature-box {
+            background-color: #f0fdf4;
+            border: 2px solid #22c55e;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .signature-box h3 {
+            color: #22c55e;
+            margin-top: 0;
+        }
+        
+        .signature-box code {
+            background-color: #fff;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 9pt;
+            word-break: break-all;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #0ea5e9;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <div class="header">
+        <h1>🔍 ブロックチェーン調査レポート</h1>
+        <div class="subtitle">{{ title }}</div>
+    </div>
+    
+    <!-- メタデータ -->
+    <div class="metadata">
+        <table>
+            <tr>
+                <td>案件番号</td>
+                <td><strong>{{ case_number }}</strong></td>
+            </tr>
+            <tr>
+                <td>対象アドレス</td>
+                <td><code>{{ target_address }}</code></td>
+            </tr>
+            <tr>
+                <td>ブロックチェーン</td>
+                <td>{{ blockchain | upper }}</td>
+            </tr>
+            <tr>
+                <td>リスクスコア</td>
+                <td>
+                    {{ risk_score }} / 100
+                    <span class="risk-badge risk-{{ risk_level }}">{{ risk_level | upper }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>調査実施者</td>
+                <td>{{ investigator_name }}</td>
+            </tr>
+            <tr>
+                <td>レポート生成日時</td>
+                <td>{{ generated_at }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- エグゼクティブサマリー -->
+    <div class="section">
+        <h2>1. エグゼクティブサマリー</h2>
+        <p>{{ executive_summary }}</p>
+    </div>
+    
+    <!-- 調査概要 -->
+    <div class="section">
+        <h2>2. 調査概要</h2>
+        
+        <h3>2.1 調査目的</h3>
+        <p>
+            本調査は、対象ブロックチェーンアドレス（{{ target_address }}）に関連する
+            取引パターンを分析し、マネーロンダリング等の不正行為の有無を評価することを目的としています。
+        </p>
+        
+        <h3>2.2 調査範囲</h3>
+        <ul>
+            <li>対象ブロックチェーン: {{ blockchain | upper }}</li>
+            <li>分析トランザクション数: {{ total_transactions }}件</li>
+            <li>関連アドレス数: {{ total_addresses }}個</li>
+            <li>総取引量: {{ "%.4f"|format(total_volume) }} {{ blockchain | upper }}</li>
+        </ul>
+        
+        <h3>2.3 調査手法</h3>
+        <p>
+            以下の手法を用いて包括的な分析を実施しました：
+        </p>
+        <ul>
+            <li>ブロックチェーントランザクションの追跡</li>
+            <li>資金フローパターンの可視化</li>
+            <li>ルールベースおよびAI駆動の異常検知</li>
+            <li>制裁リストとの照合</li>
+            <li>既知の高リスクエンティティとの関連性分析</li>
+        </ul>
+    </div>
+    
+    <!-- 主要発見 -->
+    <div class="section">
+        <h2>3. 主要発見</h2>
+        
+        {% if key_findings %}
+        <ul class="findings-list">
+            {% for finding in key_findings %}
+            <li>{{ finding }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>特筆すべき重要な発見事項はありませんでした。</p>
+        {% endif %}
+    </div>
+    
+    <!-- 検出されたパターン -->
+    <div class="section">
+        <h2>4. 検出されたパターン</h2>
+        
+        {% if detected_patterns %}
+            {% for pattern in detected_patterns %}
+            <div class="pattern-card">
+                <h4>⚠️ {{ pattern.type }} パターン（信頼度: {{ pattern.confidence * 100 }}%）</h4>
+                <p><strong>説明:</strong> {{ pattern.description }}</p>
+                <p><strong>関連アドレス数:</strong> {{ pattern.addresses_count }}</p>
+                <p><strong>総取引額:</strong> {{ "%.4f"|format(pattern.total_amount) }} {{ blockchain | upper }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p>疑わしいパターンは検出されませんでした。</p>
+        {% endif %}
+    </div>
+    
+    <!-- リスク評価 -->
+    <div class="section">
+        <h2>5. リスク評価</h2>
+        
+        <h3>5.1 総合リスクスコア</h3>
+        <p>
+            本調査の結果、対象アドレスの総合リスクスコアは <strong>{{ risk_score }}/100</strong> と
+            評価されました。これは「<span class="risk-badge risk-{{ risk_level }}">{{ risk_level | upper }}</span>」
+            リスクに分類されます。
+        </p>
+        
+        <h3>5.2 リスク要因の内訳</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>リスク要因</th>
+                    <th>スコア影響</th>
+                    <th>説明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ミキシングサービス利用</td>
+                    <td>+30</td>
+                    <td>Tornado Cash等のミキシングサービスとの取引が確認されました</td>
+                </tr>
+                <tr>
+                    <td>レイヤリングパターン</td>
+                    <td>+25</td>
+                    <td>複数の中間ウォレットを経由した資金移動が検出されました</td>
+                </tr>
+                <tr>
+                    <td>大口取引</td>
+                    <td>+20</td>
+                    <td>閾値を超える大規模取引が確認されました</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 推奨アクション -->
+    <div class="section">
+        <h2>6. 推奨アクション</h2>
+        
+        <h3>6.1 即座に実施すべき対応</h3>
+        <ul>
+            <li>関連取引の詳細調査の継続</li>
+            <li>該当アドレスの監視リストへの追加</li>
+            <li>必要に応じた法執行機関への通報検討</li>
+        </ul>
+        
+        <h3>6.2 追加調査の推奨事項</h3>
+        <ul>
+            <li>検出されたパターンに関連する他のアドレスの調査</li>
+            <li>より長期間のトランザクション履歴の分析</li>
+            <li>オフチェーン情報（KYC情報等）との照合</li>
+        </ul>
+    </div>
+    
+    <!-- 証拠性担保 -->
+    <div class="signature-box">
+        <h3>🔐 証拠性担保情報</h3>
+        <p><strong>レポートID:</strong> {{ investigation_id }}</p>
+        <p><strong>生成日時:</strong> {{ generated_at }} (UTC)</p>
+        <p><strong>デジタル署名:</strong><br><code>SHA256:{{ digital_signature if digital_signature else 'N/A' }}</code></p>
+        <p><strong>検証用ハッシュ:</strong><br><code>{{ content_hash if content_hash else 'N/A' }}</code></p>
+        <p style="font-size: 9pt; margin-top: 10px; color: #666;">
+            ※ このレポートはタイムスタンプとデジタル署名により、生成時点での内容の真正性が保証されています。
+        </p>
+    </div>
+    
+    <!-- フッター -->
+    <div class="footer">
+        <p>
+            <strong>免責事項:</strong> 本レポートは、公開されているブロックチェーンデータに基づく分析結果であり、
+            法的助言を構成するものではありません。実際の法的手続きにおいては、専門家にご相談ください。
+        </p>
+        <p style="text-align: center; margin-top: 20px;">
+            © {{ generated_at[:4] }} MetaSleuth NextGen. All rights reserved.<br>
+            Generated by MetaSleuth NextGen Blockchain Investigation Platform
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Investigation Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: "Arial", "Helvetica", sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #0ea5e9;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #0ea5e9;
+            font-size: 24pt;
+            margin: 0 0 10px 0;
+        }
+        
+        .header .subtitle {
+            font-size: 14pt;
+            color: #666;
+        }
+        
+        .metadata {
+            background-color: #f0f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .metadata table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .metadata td {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .metadata td:first-child {
+            font-weight: bold;
+            width: 30%;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #0ea5e9;
+            font-size: 16pt;
+            border-bottom: 2px solid #0ea5e9;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .section h3 {
+            color: #333;
+            font-size: 12pt;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .risk-high { background-color: #ef4444; }
+        .risk-medium { background-color: #f59e0b; }
+        .risk-low { background-color: #22c55e; }
+        .risk-none { background-color: #64748b; }
+        
+        .findings-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .findings-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9fafb;
+            border-left: 4px solid #0ea5e9;
+        }
+        
+        .pattern-card {
+            background-color: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .pattern-card h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .signature-box {
+            background-color: #f0fdf4;
+            border: 2px solid #22c55e;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .signature-box h3 {
+            color: #22c55e;
+            margin-top: 0;
+        }
+        
+        .signature-box code {
+            background-color: #fff;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 9pt;
+            word-break: break-all;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #0ea5e9;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔍 Blockchain Investigation Report</h1>
+        <div class="subtitle">{{ title }}</div>
+    </div>
+    
+    <!-- Metadata -->
+    <div class="metadata">
+        <table>
+            <tr>
+                <td>Case Number</td>
+                <td><strong>{{ case_number }}</strong></td>
+            </tr>
+            <tr>
+                <td>Target Address</td>
+                <td><code>{{ target_address }}</code></td>
+            </tr>
+            <tr>
+                <td>Blockchain</td>
+                <td>{{ blockchain | upper }}</td>
+            </tr>
+            <tr>
+                <td>Risk Score</td>
+                <td>
+                    {{ risk_score }} / 100
+                    <span class="risk-badge risk-{{ risk_level }}">{{ risk_level | upper }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>Investigator</td>
+                <td>{{ investigator_name }}</td>
+            </tr>
+            <tr>
+                <td>Report Generated</td>
+                <td>{{ generated_at }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Executive Summary -->
+    <div class="section">
+        <h2>1. Executive Summary</h2>
+        <p>{{ executive_summary }}</p>
+    </div>
+    
+    <!-- Investigation Overview -->
+    <div class="section">
+        <h2>2. Investigation Overview</h2>
+        
+        <h3>2.1 Investigation Purpose</h3>
+        <p>
+            This investigation was conducted to analyze transaction patterns associated with the target 
+            blockchain address ({{ target_address }}) and assess potential involvement in illicit activities 
+            such as money laundering.
+        </p>
+        
+        <h3>2.2 Investigation Scope</h3>
+        <ul>
+            <li>Target Blockchain: {{ blockchain | upper }}</li>
+            <li>Analyzed Transactions: {{ total_transactions }} transactions</li>
+            <li>Related Addresses: {{ total_addresses }} addresses</li>
+            <li>Total Transaction Volume: {{ "%.4f"|format(total_volume) }} {{ blockchain | upper }}</li>
+        </ul>
+        
+        <h3>2.3 Investigation Methodology</h3>
+        <p>
+            The following methodologies were employed for comprehensive analysis:
+        </p>
+        <ul>
+            <li>Blockchain transaction tracing</li>
+            <li>Fund flow pattern visualization</li>
+            <li>Rule-based and AI-driven anomaly detection</li>
+            <li>Sanctions list cross-referencing</li>
+            <li>Association analysis with known high-risk entities</li>
+        </ul>
+    </div>
+    
+    <!-- Key Findings -->
+    <div class="section">
+        <h2>3. Key Findings</h2>
+        
+        {% if key_findings %}
+        <ul class="findings-list">
+            {% for finding in key_findings %}
+            <li>{{ finding }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No significant findings were identified during the investigation.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Detected Patterns -->
+    <div class="section">
+        <h2>4. Detected Patterns</h2>
+        
+        {% if detected_patterns %}
+            {% for pattern in detected_patterns %}
+            <div class="pattern-card">
+                <h4>⚠️ {{ pattern.type }} Pattern (Confidence: {{ pattern.confidence * 100 }}%)</h4>
+                <p><strong>Description:</strong> {{ pattern.description }}</p>
+                <p><strong>Related Addresses:</strong> {{ pattern.addresses_count }}</p>
+                <p><strong>Total Amount:</strong> {{ "%.4f"|format(pattern.total_amount) }} {{ blockchain | upper }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p>No suspicious patterns were detected.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Risk Assessment -->
+    <div class="section">
+        <h2>5. Risk Assessment</h2>
+        
+        <h3>5.1 Overall Risk Score</h3>
+        <p>
+            Based on the analysis, the target address has been assigned an overall risk score of 
+            <strong>{{ risk_score }}/100</strong>, which is classified as 
+            "<span class="risk-badge risk-{{ risk_level }}">{{ risk_level | upper }}</span>" risk level.
+        </p>
+        
+        <h3>5.2 Risk Factor Breakdown</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Risk Factor</th>
+                    <th>Score Impact</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Mixing Service Usage</td>
+                    <td>+30</td>
+                    <td>Transactions with mixing services such as Tornado Cash were identified</td>
+                </tr>
+                <tr>
+                    <td>Layering Pattern</td>
+                    <td>+25</td>
+                    <td>Fund movements through multiple intermediary wallets were detected</td>
+                </tr>
+                <tr>
+                    <td>Large Transactions</td>
+                    <td>+20</td>
+                    <td>Transactions exceeding established thresholds were confirmed</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Recommended Actions -->
+    <div class="section">
+        <h2>6. Recommended Actions</h2>
+        
+        <h3>6.1 Immediate Actions</h3>
+        <ul>
+            <li>Continue detailed investigation of related transactions</li>
+            <li>Add the address to monitoring watchlist</li>
+            <li>Consider reporting to law enforcement agencies if warranted</li>
+        </ul>
+        
+        <h3>6.2 Further Investigation Recommendations</h3>
+        <ul>
+            <li>Investigate other addresses associated with detected patterns</li>
+            <li>Analyze longer-term transaction history</li>
+            <li>Cross-reference with off-chain information (KYC data, etc.)</li>
+        </ul>
+    </div>
+    
+    <!-- Evidence Integrity -->
+    <div class="signature-box">
+        <h3>🔐 Evidence Integrity Information</h3>
+        <p><strong>Report ID:</strong> {{ investigation_id }}</p>
+        <p><strong>Generated At:</strong> {{ generated_at }} (UTC)</p>
+        <p><strong>Digital Signature:</strong><br><code>SHA256:{{ digital_signature if digital_signature else 'N/A' }}</code></p>
+        <p><strong>Verification Hash:</strong><br><code>{{ content_hash if content_hash else 'N/A' }}</code></p>
+        <p style="font-size: 9pt; margin-top: 10px; color: #666;">
+            ※ This report is timestamped and digitally signed to guarantee the authenticity of its contents at the time of generation.
+        </p>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>
+            <strong>Disclaimer:</strong> This report is based on analysis of publicly available blockchain data 
+            and does not constitute legal advice. For actual legal proceedings, please consult with legal professionals.
+        </p>
+        <p style="text-align: center; margin-top: 20px;">
+            © {{ generated_at[:4] }} MetaSleuth NextGen. All rights reserved.<br>
+            Generated by MetaSleuth NextGen Blockchain Investigation Platform
+        </p>
+    </div>
+</body>
+</html>
