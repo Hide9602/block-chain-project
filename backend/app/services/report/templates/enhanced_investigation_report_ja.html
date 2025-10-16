@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブロックチェーン調査レポート - {{ case_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+            @top-center {
+                content: "機密 - ブロックチェーン調査レポート";
+                font-size: 10px;
+                color: #999;
+            }
+            @bottom-center {
+                content: "ページ " counter(page) " / " counter(pages);
+                font-size: 10px;
+                color: #999;
+            }
+        }
+        
+        body {
+            font-family: "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+            line-height: 1.8;
+            color: #333;
+            font-size: 11pt;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 24pt;
+            color: #0066cc;
+            margin: 10px 0;
+        }
+        
+        .header .classification {
+            display: inline-block;
+            background-color: #dc2626;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        
+        .metadata-box {
+            background-color: #f3f4f6;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .metadata-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .metadata-box td {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .metadata-box td:first-child {
+            font-weight: bold;
+            width: 30%;
+            color: #4b5563;
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14pt;
+            text-transform: uppercase;
+        }
+        
+        .risk-critical { background-color: #dc2626; color: white; }
+        .risk-high { background-color: #ef4444; color: white; }
+        .risk-medium { background-color: #f59e0b; color: white; }
+        .risk-low { background-color: #22c55e; color: white; }
+        .risk-minimal { background-color: #6ee7b7; color: #064e3b; }
+        .risk-none { background-color: #64748b; color: white; }
+        
+        .section {
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+        
+        .section h2 {
+            color: #0066cc;
+            font-size: 16pt;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .section h3 {
+            color: #374151;
+            font-size: 13pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .executive-summary {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 11pt;
+        }
+        
+        .pattern-card {
+            background-color: #fff7ed;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .pattern-card h4 {
+            color: #ea580c;
+            margin-top: 0;
+            font-size: 12pt;
+        }
+        
+        .pattern-card .confidence {
+            float: right;
+            background-color: #fed7aa;
+            color: #9a3412;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 9pt;
+            font-weight: bold;
+        }
+        
+        .anomaly-card {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .anomaly-card h4 {
+            color: #dc2626;
+            margin-top: 0;
+            font-size: 12pt;
+        }
+        
+        .anomaly-card .severity {
+            float: right;
+            background-color: #fecaca;
+            color: #991b1b;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 9pt;
+            font-weight: bold;
+        }
+        
+        .narrative-section {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            line-height: 2;
+        }
+        
+        .graph-container {
+            text-align: center;
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+        
+        .graph-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .graph-caption {
+            font-size: 9pt;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+        
+        .statistics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-box {
+            background-color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-box .value {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .stat-box .label {
+            font-size: 9pt;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .recommendation-list {
+            background-color: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 15px 15px 15px 40px;
+            margin: 20px 0;
+        }
+        
+        .recommendation-list li {
+            margin: 10px 0;
+        }
+        
+        .signature-box {
+            background-color: #f9fafb;
+            border: 2px solid #0066cc;
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 8px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-box h3 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        
+        .signature-box code {
+            display: block;
+            background-color: #e5e7eb;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 8pt;
+            word-break: break-all;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 9pt;
+            color: #6b7280;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        table.data-table th {
+            background-color: #0066cc;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 10pt;
+        }
+        
+        table.data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 9pt;
+        }
+        
+        table.data-table tr:hover {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="classification">機密 - CONFIDENTIAL</div>
+        <h1>ブロックチェーン調査レポート</h1>
+        <p style="font-size: 12pt; color: #6b7280;">AI駆動型資金フロー分析システム</p>
+    </div>
+    
+    <!-- Metadata -->
+    <div class="metadata-box">
+        <table>
+            <tr>
+                <td>事件番号</td>
+                <td><strong>{{ case_number }}</strong></td>
+            </tr>
+            <tr>
+                <td>事件タイトル</td>
+                <td><strong>{{ case_title }}</strong></td>
+            </tr>
+            <tr>
+                <td>調査ID</td>
+                <td>{{ investigation_id }}</td>
+            </tr>
+            <tr>
+                <td>調査官</td>
+                <td>{{ investigator_name }}</td>
+            </tr>
+            <tr>
+                <td>生成日時</td>
+                <td>{{ generated_at }}</td>
+            </tr>
+            <tr>
+                <td>対象アドレス</td>
+                <td><code style="font-size: 9pt;">{{ address }}</code></td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Statistics Overview -->
+    <div class="statistics-grid">
+        <div class="stat-box">
+            <div class="value">{{ transaction_count }}</div>
+            <div class="label">取引数</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ '%.4f'|format(total_volume) }}</div>
+            <div class="label">総取引額 (ETH)</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ detected_patterns|length + detected_anomalies|length }}</div>
+            <div class="label">検出された脅威</div>
+        </div>
+    </div>
+    
+    <!-- Risk Assessment -->
+    <div class="section">
+        <h2>🚨 リスク評価</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <span class="risk-badge risk-{{ risk_assessment.risk_level }}">
+                {{ risk_assessment.risk_level }} リスク
+            </span>
+            <p style="font-size: 14pt; margin-top: 10px;">
+                リスクスコア: <strong>{{ '%.1f'|format(risk_assessment.risk_score) }}/100</strong>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Executive Summary -->
+    <div class="section">
+        <h2>📋 エグゼクティブサマリー</h2>
+        <div class="executive-summary">
+            {{ executive_summary }}
+        </div>
+    </div>
+    
+    <!-- AI Generated Narrative -->
+    {% if narrative %}
+    <div class="section">
+        <h2>🤖 AI分析ナラティブ</h2>
+        <div class="narrative-section">
+            {% for paragraph in narrative.split('\n\n') %}
+                {% if paragraph.strip() %}
+                    <p>{{ paragraph.strip() }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Detected Patterns -->
+    {% if detected_patterns %}
+    <div class="section">
+        <h2>⚠️ 検出されたマネーロンダリングパターン</h2>
+        <p>AI駆動型パターンマッチングにより、以下の{{ detected_patterns|length }}個の疑わしいパターンが検出されました：</p>
+        
+        {% for pattern in detected_patterns %}
+        <div class="pattern-card">
+            <span class="confidence">信頼度: {{ '%.0f'|format(pattern.confidence * 100) }}%</span>
+            <h4>{{ pattern.name_ja }}</h4>
+            <p>{{ pattern.description_ja }}</p>
+            <p style="font-size: 9pt; color: #6b7280; margin-top: 10px;">
+                取引数: {{ pattern.transaction_count }} | 
+                合計金額: {{ '%.4f'|format(pattern.total_amount) }} ETH
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Detected Anomalies -->
+    {% if detected_anomalies %}
+    <div class="section">
+        <h2>📊 検出された統計的異常</h2>
+        <p>統計分析により、以下の{{ detected_anomalies|length }}個の異常が検出されました：</p>
+        
+        {% for anomaly in detected_anomalies[:10] %}
+        <div class="anomaly-card">
+            <span class="severity">深刻度: {{ anomaly.severity }}</span>
+            <h4>{{ anomaly.anomaly_type }} 異常</h4>
+            <p>{{ anomaly.description_ja }}</p>
+        </div>
+        {% endfor %}
+        
+        {% if detected_anomalies|length > 10 %}
+        <p style="text-align: center; color: #6b7280; font-size: 9pt;">
+            ...他 {{ detected_anomalies|length - 10 }} 件の異常（詳細はJSONレポートを参照）
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Transaction Graph -->
+    {% if include_graph and graph_image %}
+    <div class="section">
+        <h2>🔗 取引グラフ可視化</h2>
+        <div class="graph-container">
+            <img src="{{ graph_image }}" alt="Transaction Graph Visualization">
+            <p class="graph-caption">
+                図: 対象アドレスを中心とした取引フローの可視化。
+                ノードの色はリスクレベルを、エッジの太さは取引額を表します。
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Recommendations -->
+    {% if risk_assessment.recommendations %}
+    <div class="section">
+        <h2>💡 推奨される対応措置</h2>
+        <div class="recommendation-list">
+            <ul>
+                {% for recommendation in risk_assessment.recommendations.ja %}
+                <li>{{ recommendation }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Digital Signature -->
+    <div class="signature-box">
+        <h3>🔐 証拠性担保情報</h3>
+        <p>本レポートの改ざん検知のため、以下の暗号学的証明が付与されています：</p>
+        
+        <p><strong>デジタル署名 (SHA-256):</strong></p>
+        <code>{{ digital_signature }}</code>
+        
+        <p style="margin-top: 15px;"><strong>コンテンツハッシュ:</strong></p>
+        <code>{{ content_hash }}</code>
+        
+        <p style="margin-top: 15px; font-size: 9pt; color: #6b7280;">
+            これらのハッシュ値を用いることで、レポートの真正性を検証し、改ざんの有無を確認できます。
+            検証方法については、システム管理者にお問い合わせください。
+        </p>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>このレポートは、MetaSleuth NextGen AI駆動型ブロックチェーン調査プラットフォームにより生成されました。</p>
+        <p>© 2024 MetaSleuth NextGen | 機密情報 - 許可なき複製・配布を禁ず</p>
+    </div>
+</body>
+</html>
