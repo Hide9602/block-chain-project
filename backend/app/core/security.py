@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 
@@ -128,20 +129,26 @@ def decode_token(token: str) -> dict:
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> dict:
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(lambda: None)  # Will be injected properly when called
+):
     """
     現在のユーザー情報を取得（Dependency）
     
     Args:
         credentials: HTTPAuthorizationCredentials
+        db: Database session
     
     Returns:
-        dict: ユーザー情報
+        User: User model instance
     
     Raises:
         HTTPException: 認証失敗時
     """
+    # Import here to avoid circular imports
+    from app.core.database import get_db
+    from app.crud.user import user_crud
+    
     token = credentials.credentials
     payload = decode_token(token)
     
@@ -161,27 +168,44 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    return {"user_id": user_id, "email": payload.get("email")}
+    # Get database session if not provided
+    if db is None:
+        async for session in get_db():
+            db = session
+            break
+    
+    # Get user from database
+    user = await user_crud.get_by_id(db, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return user
 
 
 async def get_current_active_user(
-    current_user: dict = Depends(get_current_user)
-) -> dict:
+    current_user = Depends(get_current_user)
+):
     """
     アクティブなユーザーのみを許可（Dependency）
     
     Args:
-        current_user: 現在のユーザー
+        current_user: 現在のユーザー (User model)
     
     Returns:
-        dict: ユーザー情報
+        User: ユーザーモデル
     
     Raises:
         HTTPException: ユーザーが非アクティブな場合
     """
-    # TODO: データベースからユーザー情報を取得し、is_activeをチェック
-    # if not user.is_active:
-    #     raise HTTPException(status_code=400, detail="Inactive user")
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user"
+        )
     
     return current_user
 

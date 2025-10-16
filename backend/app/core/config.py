@@ -87,7 +87,7 @@ class Settings(BaseSettings):
     
     # ファイルストレージ設定
     UPLOAD_DIR: str = "/tmp/metasleuth/uploads"
-    REPORT_DIR: str = "/tmp/metasleuth/reports"
+    REPORTS_DIR: str = "/tmp/metasleuth/reports"  # Changed from REPORT_DIR for consistency
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
     
     # レポート生成設定
