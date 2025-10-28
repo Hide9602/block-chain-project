@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import cytoscape, { Core, NodeSingular, EdgeSingular } from 'cytoscape';
 import { useTranslation } from 'react-i18next';
+import cytoscape, { Core, NodeSingular, EdgeSingular } from 'cytoscape';
 
 interface GraphNode {
   id: string;
@@ -41,11 +41,12 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   height = '600px',
   className = '',
 }) => {
-  const { t } = useTranslation('glossary');
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null);
+  const [layoutType, setLayoutType] = useState<'breadthfirst' | 'circle' | 'concentric'>('breadthfirst');
 
   // リスクレベルに応じた色
   const getRiskColor = (riskLevel: string): string => {
@@ -108,39 +109,42 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         {
           selector: 'node',
           style: {
-            'background-color': (ele: NodeSingular) => {
+            'background-color': function(ele: any) {
               const node = ele.data() as GraphNode;
-              if (node.isSanctioned) return '#dc2626'; // 制裁対象は濃い赤
+              if (node.isSanctioned) return '#dc2626';
               return getNodeTypeColor(node.nodeType);
             },
             label: 'data(label)',
             'text-valign': 'center',
             'text-halign': 'center',
-            color: '#fff',
-            'font-size': '12px',
+            color: '#ffffff',
+            'text-outline-color': '#000000',
+            'text-outline-width': 2,
+            'font-size': '14px',
             'font-weight': 'bold',
-            width: (ele: NodeSingular) => {
+            'text-wrap': 'wrap',
+            'text-max-width': '80px',
+            width: function(ele: any) {
               const node = ele.data() as GraphNode;
-              // 残高に応じてサイズ変更
-              const baseSize = 40;
+              const baseSize = 50;
               if (node.balance) {
-                return Math.min(baseSize + node.balance * 2, 100);
+                return Math.min(baseSize + node.balance * 3, 120);
               }
               return baseSize;
             },
-            height: (ele: NodeSingular) => {
+            height: function(ele: any) {
               const node = ele.data() as GraphNode;
-              const baseSize = 40;
+              const baseSize = 50;
               if (node.balance) {
-                return Math.min(baseSize + node.balance * 2, 100);
+                return Math.min(baseSize + node.balance * 3, 120);
               }
               return baseSize;
             },
-            'border-width': (ele: NodeSingular) => {
+            'border-width': function(ele: any) {
               const node = ele.data() as GraphNode;
-              return node.riskLevel === 'high' ? 4 : 2;
+              return node.riskLevel === 'high' ? 5 : 3;
             },
-            'border-color': (ele: NodeSingular) => {
+            'border-color': function(ele: any) {
               const node = ele.data() as GraphNode;
               return getRiskColor(node.riskLevel);
             },
@@ -150,24 +154,28 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         {
           selector: 'edge',
           style: {
-            width: (ele: EdgeSingular) => {
+            width: function(ele: any) {
               const edge = ele.data() as GraphEdge;
-              // 金額に応じて太さ変更
-              return Math.min(Math.max(edge.amount / 2, 1), 10);
+              return Math.min(Math.max(edge.amount / 2, 2), 8);
             },
-            'line-color': (ele: EdgeSingular) => {
+            'line-color': function(ele: any) {
               const edge = ele.data() as GraphEdge;
-              return edge.isSuspicious ? '#ef4444' : '#cbd5e1';
+              return edge.isSuspicious ? '#ef4444' : '#94a3b8';
             },
-            'target-arrow-color': (ele: EdgeSingular) => {
+            'target-arrow-color': function(ele: any) {
               const edge = ele.data() as GraphEdge;
-              return edge.isSuspicious ? '#ef4444' : '#cbd5e1';
+              return edge.isSuspicious ? '#ef4444' : '#94a3b8';
             },
             'target-arrow-shape': 'triangle',
+            'arrow-scale': 1.5,
             'curve-style': 'bezier',
             label: 'data(label)',
-            'font-size': '10px',
-            color: '#475569',
+            'font-size': '11px',
+            'font-weight': 'bold',
+            color: '#1e293b',
+            'text-background-color': '#ffffff',
+            'text-background-opacity': 0.8,
+            'text-background-padding': '3px',
             'text-rotation': 'autorotate',
             'text-margin-y': -10,
           },
@@ -192,18 +200,13 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         },
       ],
       layout: {
-        name: 'cose',
+        name: 'breadthfirst',
+        directed: true,
+        spacingFactor: 1.5,
         animate: true,
-        animationDuration: 500,
-        nodeRepulsion: 8000,
-        idealEdgeLength: 100,
-        edgeElasticity: 100,
-        nestingFactor: 5,
-        gravity: 80,
-        numIter: 1000,
-        initialTemp: 200,
-        coolingFactor: 0.95,
-        minTemp: 1.0,
+        animationDuration: 1000,
+        avoidOverlap: true,
+        nodeDimensionsIncludeLabels: true,
       },
       minZoom: 0.3,
       maxZoom: 3,
@@ -274,14 +277,94 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     link.click();
   };
 
+  const changeLayout = (newLayout: 'breadthfirst' | 'circle' | 'concentric') => {
+    if (!cyRef.current) return;
+    setLayoutType(newLayout);
+    
+    const layoutOptions: any = {
+      breadthfirst: {
+        name: 'breadthfirst',
+        directed: true,
+        spacingFactor: 1.5,
+        animate: true,
+        animationDuration: 1000,
+        avoidOverlap: true,
+        nodeDimensionsIncludeLabels: true,
+      },
+      circle: {
+        name: 'circle',
+        animate: true,
+        animationDuration: 1000,
+        avoidOverlap: true,
+        spacingFactor: 1.5,
+      },
+      concentric: {
+        name: 'concentric',
+        animate: true,
+        animationDuration: 1000,
+        avoidOverlap: true,
+        spacingFactor: 1.5,
+        concentric: function(node: any) {
+          const n = node.data() as GraphNode;
+          if (n.isSanctioned) return 100;
+          if (n.riskLevel === 'high') return 80;
+          if (n.riskLevel === 'medium') return 60;
+          return 40;
+        },
+        levelWidth: function() {
+          return 2;
+        },
+      },
+    };
+
+    cyRef.current.layout(layoutOptions[newLayout]).run();
+  };
+
   return (
     <div className={`relative ${className}`}>
       {/* コントロールパネル */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+        {/* レイアウト選択 */}
+        <div className="rounded-lg bg-white p-2 shadow-md">
+          <div className="mb-1 text-xs font-semibold text-gray-600">{t('graph.controls.layout')}</div>
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={() => changeLayout('breadthfirst')}
+              className={`rounded px-2 py-1 text-xs font-medium transition ${
+                layoutType === 'breadthfirst'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {t('graph.controls.tree')}
+            </button>
+            <button
+              onClick={() => changeLayout('circle')}
+              className={`rounded px-2 py-1 text-xs font-medium transition ${
+                layoutType === 'circle' 
+                  ? 'bg-purple-500 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {t('graph.controls.circle')}
+            </button>
+            <button
+              onClick={() => changeLayout('concentric')}
+              className={`rounded px-2 py-1 text-xs font-medium transition ${
+                layoutType === 'concentric'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {t('graph.controls.risk')}
+            </button>
+          </div>
+        </div>
+
         <button
           onClick={fitGraph}
           className="rounded-lg bg-white px-3 py-2 text-sm shadow-md hover:bg-gray-50"
-          title={t('graphVisualization.fitGraph', 'Fit Graph')}
+          title={t('graph.controls.fit')}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -296,7 +379,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         <button
           onClick={centerGraph}
           className="rounded-lg bg-white px-3 py-2 text-sm shadow-md hover:bg-gray-50"
-          title={t('graphVisualization.center', 'Center')}
+          title={t('graph.controls.center')}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -311,7 +394,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         <button
           onClick={resetZoom}
           className="rounded-lg bg-white px-3 py-2 text-sm shadow-md hover:bg-gray-50"
-          title={t('graphVisualization.resetZoom', 'Reset Zoom')}
+          title={t('graph.controls.resetZoom')}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -326,7 +409,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         <button
           onClick={exportImage}
           className="rounded-lg bg-white px-3 py-2 text-sm shadow-md hover:bg-gray-50"
-          title={t('graphVisualization.export', 'Export Image')}
+          title={t('graph.controls.export')}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -345,24 +428,24 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
       {/* 選択ノード情報パネル */}
       {selectedNode && (
         <div className="absolute bottom-4 left-4 z-10 w-80 rounded-lg bg-white p-4 shadow-lg">
-          <h3 className="mb-2 text-lg font-bold">{t('graphVisualization.nodeDetails')}</h3>
+          <h3 className="mb-2 text-lg font-bold">{t('graph.nodeDetails')}</h3>
           <div className="space-y-1 text-sm">
             <p>
-              <span className="font-semibold">{t('blockchain.address')}:</span>{' '}
+              <span className="font-semibold">{t('graph.fields.address')}:</span>{' '}
               <span className="font-mono">{selectedNode.address}</span>
             </p>
             <p>
-              <span className="font-semibold">{t('graphVisualization.nodeType', 'Type')}:</span>{' '}
+              <span className="font-semibold">{t('graph.fields.type')}:</span>{' '}
               {selectedNode.nodeType}
             </p>
             {selectedNode.balance && (
               <p>
-                <span className="font-semibold">{t('blockchain.balance', 'Balance')}:</span>{' '}
+                <span className="font-semibold">{t('graph.fields.balance')}:</span>{' '}
                 {selectedNode.balance} ETH
               </p>
             )}
             <p>
-              <span className="font-semibold">{t('investigation.risk')}:</span>{' '}
+              <span className="font-semibold">{t('graph.fields.risk')}:</span>{' '}
               <span
                 className="rounded px-2 py-1 text-xs font-bold text-white"
                 style={{ backgroundColor: getRiskColor(selectedNode.riskLevel) }}
@@ -372,7 +455,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
             </p>
             {selectedNode.isSanctioned && (
               <p className="rounded bg-red-100 p-2 text-red-800">
-                ⚠️ {t('riskAssessment.sanctioned')}
+                {t('graph.status.sanctioned')}
               </p>
             )}
           </div>
@@ -382,23 +465,23 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
       {/* 選択エッジ情報パネル */}
       {selectedEdge && (
         <div className="absolute bottom-4 left-4 z-10 w-80 rounded-lg bg-white p-4 shadow-lg">
-          <h3 className="mb-2 text-lg font-bold">{t('graphVisualization.edgeDetails')}</h3>
+          <h3 className="mb-2 text-lg font-bold">{t('graph.edgeDetails')}</h3>
           <div className="space-y-1 text-sm">
             <p>
-              <span className="font-semibold">{t('blockchain.amount', 'Amount')}:</span>{' '}
+              <span className="font-semibold">{t('graph.fields.amount')}:</span>{' '}
               {selectedEdge.amount} ETH
             </p>
             <p>
-              <span className="font-semibold">{t('blockchain.timestamp')}:</span>{' '}
+              <span className="font-semibold">{t('graph.fields.timestamp')}:</span>{' '}
               {new Date(selectedEdge.timestamp).toLocaleString()}
             </p>
             <p>
-              <span className="font-semibold">{t('blockchain.txHash')}:</span>{' '}
+              <span className="font-semibold">{t('graph.fields.txHash')}:</span>{' '}
               <span className="font-mono text-xs">{selectedEdge.txHash}</span>
             </p>
             {selectedEdge.isSuspicious && (
               <p className="rounded bg-red-100 p-2 text-red-800">
-                ⚠️ {t('riskAssessment.suspicious')}
+                {t('graph.status.suspicious')}
               </p>
             )}
           </div>
@@ -407,23 +490,23 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
 
       {/* 凡例 */}
       <div className="absolute bottom-4 right-4 z-10 rounded-lg bg-white p-4 shadow-md">
-        <h4 className="mb-2 text-sm font-bold">{t('graphVisualization.legend', 'Legend')}</h4>
+        <h4 className="mb-2 text-sm font-bold">{t('graph.legend')}</h4>
         <div className="space-y-2 text-xs">
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 rounded-full" style={{ backgroundColor: '#3b82f6' }} />
-            <span>{t('moneyLaundering.wallet', 'Wallet')}</span>
+            <span>{t('graph.nodeTypes.wallet')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 rounded-full" style={{ backgroundColor: '#8b5cf6' }} />
-            <span>{t('moneyLaundering.exchange', 'Exchange')}</span>
+            <span>{t('graph.nodeTypes.exchange')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 rounded-full" style={{ backgroundColor: '#ef4444' }} />
-            <span>{t('moneyLaundering.mixer', 'Mixer')}</span>
+            <span>{t('graph.nodeTypes.mixer')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 rounded-full" style={{ backgroundColor: '#06b6d4' }} />
-            <span>{t('blockchain.contract', 'Contract')}</span>
+            <span>{t('graph.nodeTypes.contract')}</span>
           </div>
         </div>
       </div>

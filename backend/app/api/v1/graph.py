@@ -10,6 +10,9 @@ from enum import Enum
 import logging
 
 from app.services.blockchain.etherscan import EtherscanClient
+from app.services.ml.pattern_matcher import PatternMatcher
+from app.services.ml.anomaly_detector import AnomalyDetector
+from app.services.ml.risk_scorer import RiskScorer
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -39,9 +42,11 @@ class NodeType(str, Enum):
 
 class RiskLevel(str, Enum):
     """リスクレベル"""
+    CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+    MINIMAL = "minimal"
     NONE = "none"
 
 
@@ -54,7 +59,12 @@ class GraphNode(BaseModel):
     label: Optional[str] = None
     balance: Optional[float] = None
     risk_level: RiskLevel = RiskLevel.NONE
+    risk_score: Optional[float] = None
     is_sanctioned: bool = False
+    transaction_count: Optional[int] = None
+    total_received: Optional[float] = None
+    total_sent: Optional[float] = None
+    detected_patterns: List[str] = []
 
 
 class GraphEdge(BaseModel):
@@ -66,6 +76,8 @@ class GraphEdge(BaseModel):
     timestamp: str
     tx_hash: str
     is_suspicious: bool = False
+    risk_indicators: List[str] = []
+    confidence: Optional[float] = None
 
 
 class GraphResponse(BaseModel):
@@ -75,6 +87,9 @@ class GraphResponse(BaseModel):
     total_nodes: int
     total_edges: int
     depth: int
+    high_risk_nodes: List[str] = []
+    suspicious_edges: List[str] = []
+    analysis_summary: Optional[dict] = None
 
 
 class TransactionDetail(BaseModel):
@@ -120,8 +135,11 @@ async def get_address_graph(
                 detail=f"Blockchain {chain.value} is not supported yet. Only Ethereum is currently supported."
             )
         
-        # Initialize Etherscan client
+        # Initialize clients
         client = EtherscanClient()
+        pattern_matcher = PatternMatcher()
+        anomaly_detector = AnomalyDetector()
+        risk_scorer = RiskScorer()
         
         # Get address balance
         balance = await client.get_address_balance(address)
@@ -131,22 +149,82 @@ async def get_address_graph(
         transactions = await client.get_address_transactions(
             address=address,
             page=1,
-            page_size=100  # Limit to 100 most recent transactions
+            page_size=500  # Increased for better ML analysis
         )
         logger.info(f"Retrieved {len(transactions)} transactions for address {address}")
         
-        # Build graph nodes and edges
+        # Run ML analysis on main address
+        detected_patterns = []
+        detected_anomalies = []
+        risk_assessment = {}
+        
+        if transactions:
+            detected_patterns = pattern_matcher.detect_patterns(transactions, address)
+            detected_anomalies = anomaly_detector.detect_anomalies(transactions, address)
+            risk_assessment = risk_scorer.calculate_risk_score(
+                address=address,
+                transactions=transactions,
+                detected_patterns=detected_patterns,
+                detected_anomalies=detected_anomalies
+            )
+        
+        # Build graph nodes and edges with ML insights
         nodes_dict = {}
         edges_list = []
+        address_transactions = {}  # Track transactions per address
         
-        # Add the starting address as a node
+        # Known mixer addresses (simplified)
+        known_mixers = {
+            "0x8589427373d6d84e98730d7795d8f6f8731fda16",  # Tornado Cash ETH
+            "0x722122df12d4e14e13ac3b6895a86e84145b6967",  # Tornado Cash
+            "0xdd4c48c0b24039969fc16d1cdf626eab821d3384",  # Tornado Cash
+        }
+        
+        # Calculate risk level for main address
+        main_risk_level = RiskLevel.NONE
+        main_risk_score = 0
+        if risk_assessment:
+            risk_level_str = risk_assessment.get("risk_level", "none")
+            main_risk_score = risk_assessment.get("risk_score", 0)
+            
+            # Map to enum
+            risk_level_map = {
+                "critical": RiskLevel.CRITICAL,
+                "high": RiskLevel.HIGH,
+                "medium": RiskLevel.MEDIUM,
+                "low": RiskLevel.LOW,
+                "minimal": RiskLevel.MINIMAL,
+                "none": RiskLevel.NONE
+            }
+            main_risk_level = risk_level_map.get(risk_level_str, RiskLevel.NONE)
+        
+        # Add the starting address as a node with risk info
+        pattern_names = [p.get("name_en", "") for p in detected_patterns]
         nodes_dict[address.lower()] = GraphNode(
             id=f"node-{address.lower()}",
             address=address.lower(),
             node_type=NodeType.WALLET,
             balance=balance,
-            risk_level=RiskLevel.NONE  # TODO: Calculate risk level
+            risk_level=main_risk_level,
+            risk_score=main_risk_score,
+            transaction_count=len(transactions),
+            detected_patterns=pattern_names
         )
+        
+        # Track transaction counts per address
+        for tx in transactions:
+            from_addr = tx["from"].lower()
+            to_addr = tx["to"].lower()
+            
+            if from_addr not in address_transactions:
+                address_transactions[from_addr] = {"sent": 0, "received": 0, "total_sent": 0.0, "total_received": 0.0}
+            if to_addr not in address_transactions:
+                address_transactions[to_addr] = {"sent": 0, "received": 0, "total_sent": 0.0, "total_received": 0.0}
+            
+            address_transactions[from_addr]["sent"] += 1
+            address_transactions[from_addr]["total_sent"] += tx["value"]
+            address_transactions[to_addr]["received"] += 1
+            address_transactions[to_addr]["total_received"] += tx["value"]
         
         # Process transactions to create nodes and edges
         for tx in transactions:
@@ -157,22 +235,81 @@ async def get_address_graph(
             from_addr = tx["from"].lower()
             to_addr = tx["to"].lower()
             
+            # Determine node type and risk
+            def determine_node_type(addr: str) -> NodeType:
+                if addr in known_mixers:
+                    return NodeType.MIXER
+                # High transaction count suggests exchange
+                if addr in address_transactions:
+                    tx_count = address_transactions[addr]["sent"] + address_transactions[addr]["received"]
+                    if tx_count > 50:
+                        return NodeType.EXCHANGE
+                return NodeType.WALLET
+            
+            def determine_node_risk(addr: str) -> RiskLevel:
+                if addr in known_mixers:
+                    return RiskLevel.HIGH
+                if addr in address_transactions:
+                    tx_count = address_transactions[addr]["sent"] + address_transactions[addr]["received"]
+                    total_volume = address_transactions[addr]["total_sent"] + address_transactions[addr]["total_received"]
+                    # Simple heuristic
+                    if total_volume > 100:
+                        return RiskLevel.MEDIUM
+                    elif tx_count > 20:
+                        return RiskLevel.LOW
+                return RiskLevel.NONE
+            
             # Add nodes if not already present
             if from_addr not in nodes_dict:
+                node_type = determine_node_type(from_addr)
+                node_risk = determine_node_risk(from_addr)
+                stats = address_transactions.get(from_addr, {})
+                
                 nodes_dict[from_addr] = GraphNode(
                     id=f"node-{from_addr}",
                     address=from_addr,
-                    node_type=NodeType.UNKNOWN,  # TODO: Identify node type
-                    risk_level=RiskLevel.NONE
+                    node_type=node_type,
+                    risk_level=node_risk,
+                    is_sanctioned=(from_addr in known_mixers),
+                    transaction_count=stats.get("sent", 0) + stats.get("received", 0),
+                    total_sent=stats.get("total_sent", 0.0),
+                    total_received=stats.get("total_received", 0.0)
                 )
             
             if to_addr not in nodes_dict:
+                node_type = determine_node_type(to_addr)
+                node_risk = determine_node_risk(to_addr)
+                stats = address_transactions.get(to_addr, {})
+                
                 nodes_dict[to_addr] = GraphNode(
                     id=f"node-{to_addr}",
                     address=to_addr,
-                    node_type=NodeType.UNKNOWN,  # TODO: Identify node type
-                    risk_level=RiskLevel.NONE
+                    node_type=node_type,
+                    risk_level=node_risk,
+                    is_sanctioned=(to_addr in known_mixers),
+                    transaction_count=stats.get("sent", 0) + stats.get("received", 0),
+                    total_sent=stats.get("total_sent", 0.0),
+                    total_received=stats.get("total_received", 0.0)
                 )
+            
+            # Determine if edge is suspicious
+            is_suspicious = False
+            risk_indicators = []
+            
+            # Check if involves mixer
+            if from_addr in known_mixers or to_addr in known_mixers:
+                is_suspicious = True
+                risk_indicators.append("mixer_interaction")
+            
+            # Check if large amount
+            if tx["value"] > 10.0:
+                risk_indicators.append("large_amount")
+            
+            # Check if involves high-risk node
+            if (nodes_dict[from_addr].risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL] or
+                nodes_dict[to_addr].risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]):
+                is_suspicious = True
+                risk_indicators.append("high_risk_address")
             
             # Add edge
             edges_list.append(GraphEdge(
@@ -182,7 +319,9 @@ async def get_address_graph(
                 amount=tx["value"],
                 timestamp=tx["timestamp"].isoformat(),
                 tx_hash=tx["hash"],
-                is_suspicious=False  # TODO: Detect suspicious transactions
+                is_suspicious=is_suspicious,
+                risk_indicators=risk_indicators,
+                confidence=0.8 if is_suspicious else None
             ))
             
             # Limit depth (only direct transactions for depth=1)
@@ -191,14 +330,40 @@ async def get_address_graph(
         
         nodes_list = list(nodes_dict.values())
         
+        # Identify high risk nodes and suspicious edges
+        high_risk_nodes = [
+            node.id for node in nodes_list 
+            if node.risk_level in [RiskLevel.CRITICAL, RiskLevel.HIGH]
+        ]
+        
+        suspicious_edges = [
+            edge.id for edge in edges_list 
+            if edge.is_suspicious
+        ]
+        
+        # Create analysis summary
+        analysis_summary = {
+            "total_volume": sum(tx["value"] for tx in transactions),
+            "patterns_detected": len(detected_patterns),
+            "anomalies_detected": len(detected_anomalies),
+            "risk_score": main_risk_score,
+            "risk_level": main_risk_level.value,
+            "high_risk_count": len(high_risk_nodes),
+            "suspicious_tx_count": len(suspicious_edges)
+        }
+        
         logger.info(f"Built graph with {len(nodes_list)} nodes and {len(edges_list)} edges")
+        logger.info(f"Identified {len(high_risk_nodes)} high-risk nodes and {len(suspicious_edges)} suspicious edges")
         
         return GraphResponse(
             nodes=nodes_list,
             edges=edges_list,
             total_nodes=len(nodes_list),
             total_edges=len(edges_list),
-            depth=depth
+            depth=depth,
+            high_risk_nodes=high_risk_nodes,
+            suspicious_edges=suspicious_edges,
+            analysis_summary=analysis_summary
         )
         
     except HTTPException:
