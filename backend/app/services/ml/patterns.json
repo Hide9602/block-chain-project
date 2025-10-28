@@ -1,0 +1,292 @@
+{
+  "patterns": [
+    {
+      "id": "smurfing",
+      "name": "Smurfing (スマーフィング)",
+      "name_ja": "スマーフィング",
+      "name_en": "Smurfing",
+      "description_ja": "大きな取引を複数の小額取引に分割し、報告義務を回避する手法。多数の小額送金が短時間に実行される特徴がある。",
+      "description_en": "A technique to split large transactions into multiple small transactions to avoid reporting requirements. Characterized by many small transfers executed in a short period.",
+      "risk_level": "high",
+      "weight": 0.9,
+      "rules": [
+        {
+          "type": "transaction_count",
+          "operator": ">=",
+          "threshold": 10,
+          "timeframe": 3600,
+          "description": "1時間以内に10件以上の送金"
+        },
+        {
+          "type": "transaction_amount",
+          "operator": "<",
+          "threshold": 1.0,
+          "description": "各取引が1 ETH未満"
+        },
+        {
+          "type": "amount_variance",
+          "operator": "<",
+          "threshold": 0.3,
+          "description": "取引額の変動係数が0.3未満（金額が類似）"
+        }
+      ],
+      "indicators": [
+        "Multiple small transactions to different addresses",
+        "Transactions occur within short time period",
+        "Similar transaction amounts",
+        "Destinations are new or low-activity addresses"
+      ]
+    },
+    {
+      "id": "layering",
+      "name": "Layering (レイヤリング)",
+      "name_ja": "レイヤリング",
+      "name_en": "Layering",
+      "description_ja": "資金源を隠蔽するため、複数の中間アドレスを経由して資金を移動させる手法。追跡を困難にすることを目的とする。",
+      "description_en": "A technique to move funds through multiple intermediary addresses to obfuscate the source. Aimed at making tracking difficult.",
+      "risk_level": "high",
+      "weight": 0.95,
+      "rules": [
+        {
+          "type": "hop_count",
+          "operator": ">=",
+          "threshold": 5,
+          "description": "5ホップ以上の連鎖取引"
+        },
+        {
+          "type": "hop_timeframe",
+          "operator": "<=",
+          "threshold": 86400,
+          "description": "24時間以内に全ホップ完了"
+        },
+        {
+          "type": "address_reuse",
+          "operator": "=",
+          "threshold": false,
+          "description": "中間アドレスの再利用なし"
+        }
+      ],
+      "indicators": [
+        "Funds pass through 5+ intermediary addresses",
+        "Chain of transactions completed quickly",
+        "Intermediary addresses have low activity",
+        "No address reuse in the chain",
+        "Final destination is unrelated to source"
+      ]
+    },
+    {
+      "id": "mixing",
+      "name": "Mixing (ミキシング)",
+      "name_ja": "ミキシング",
+      "name_en": "Mixing",
+      "description_ja": "Tornado CashやChipMixerなどのミキシングサービスを利用して資金の追跡を困難にする手法。",
+      "description_en": "A technique using mixing services like Tornado Cash or ChipMixer to make fund tracking difficult.",
+      "risk_level": "critical",
+      "weight": 1.0,
+      "rules": [
+        {
+          "type": "mixer_interaction",
+          "operator": "=",
+          "threshold": true,
+          "description": "既知のミキシングサービスとの取引"
+        }
+      ],
+      "known_mixers": [
+        "0xd90e2f925DA726b50C4Ed8D0Fb90Ad053324F31b",
+        "0x47CE0C6eD5B0Ce3d3A51fdb1C52DC66a7c3c2936",
+        "0x910Cbd523D972eb0a6f4cAe4618aD62622b39DbF",
+        "0xA160cdAB225685dA1d56aa342Ad8841c3b53f291",
+        "0xBA214C1c1928a32Bffe790263E38B4Af9bFCD659",
+        "0x22aaA7720ddd5388A3c0A3333430953C68f1849b"
+      ],
+      "indicators": [
+        "Direct interaction with known mixer contracts",
+        "Deposits to tornado.cash or similar services",
+        "Withdrawal from mixer to new address",
+        "Use of OFAC-sanctioned mixer addresses"
+      ]
+    },
+    {
+      "id": "structuring",
+      "name": "Structuring (ストラクチャリング)",
+      "name_ja": "ストラクチャリング",
+      "name_en": "Structuring",
+      "description_ja": "報告義務の閾値を下回るよう取引額を意図的に調整する手法。各国の規制を回避することが目的。",
+      "description_en": "A technique to intentionally adjust transaction amounts to stay below reporting thresholds. Aimed at evading regulations.",
+      "risk_level": "high",
+      "weight": 0.85,
+      "rules": [
+        {
+          "type": "threshold_avoidance",
+          "operator": ">=",
+          "threshold": 0.9,
+          "description": "報告閾値の90%に近い金額"
+        },
+        {
+          "type": "pattern_frequency",
+          "operator": ">=",
+          "threshold": 3,
+          "timeframe": 604800,
+          "description": "1週間に3回以上のパターン繰り返し"
+        }
+      ],
+      "reporting_thresholds": {
+        "ETH": 10.0,
+        "BTC": 0.5,
+        "USDT": 10000.0,
+        "USDC": 10000.0
+      },
+      "indicators": [
+        "Transaction amounts consistently just below thresholds",
+        "Repeated pattern across multiple days",
+        "Multiple transactions to same or related addresses",
+        "Amounts appear deliberately calculated"
+      ]
+    },
+    {
+      "id": "circular_trading",
+      "name": "Circular Trading (循環取引)",
+      "name_ja": "循環取引",
+      "name_en": "Circular Trading",
+      "description_ja": "資金が元のアドレスに戻ってくる循環的な取引パターン。取引量を人為的に増やすウォッシュトレーディングの可能性がある。",
+      "description_en": "Circular transaction patterns where funds return to the original address. Possible wash trading to artificially inflate volume.",
+      "risk_level": "medium",
+      "weight": 0.7,
+      "rules": [
+        {
+          "type": "cycle_detection",
+          "operator": "=",
+          "threshold": true,
+          "description": "資金が元のアドレスに戻る"
+        },
+        {
+          "type": "cycle_length",
+          "operator": ">=",
+          "threshold": 3,
+          "description": "サイクル長が3ホップ以上"
+        },
+        {
+          "type": "cycle_timeframe",
+          "operator": "<=",
+          "threshold": 172800,
+          "description": "48時間以内にサイクル完了"
+        }
+      ],
+      "indicators": [
+        "Funds return to original address",
+        "Multiple hops in circular path",
+        "Quick cycle completion",
+        "No economic rationale for the pattern",
+        "Similar amounts throughout cycle"
+      ]
+    },
+    {
+      "id": "rapid_movement",
+      "name": "Rapid Movement (急速移動)",
+      "name_ja": "急速移動",
+      "name_en": "Rapid Movement",
+      "description_ja": "資金を受け取った直後に別のアドレスへ転送する挙動。ホットウォレットや不正資金の可能性を示唆。",
+      "description_en": "Behavior of transferring funds to another address immediately after receiving. Suggests hot wallet or illicit funds.",
+      "risk_level": "medium",
+      "weight": 0.6,
+      "rules": [
+        {
+          "type": "time_to_transfer",
+          "operator": "<=",
+          "threshold": 300,
+          "description": "受取後5分以内に転送"
+        },
+        {
+          "type": "transfer_percentage",
+          "operator": ">=",
+          "threshold": 0.95,
+          "description": "受取額の95%以上を転送"
+        }
+      ],
+      "indicators": [
+        "Funds moved within minutes of receipt",
+        "Almost entire balance transferred",
+        "Pattern repeated across multiple transactions",
+        "Address serves as intermediary only"
+      ]
+    },
+    {
+      "id": "dusting",
+      "name": "Dusting Attack (ダスティング攻撃)",
+      "name_ja": "ダスティング攻撃",
+      "name_en": "Dusting Attack",
+      "description_ja": "極小額の暗号資産を大量のアドレスに送信し、ユーザーの行動を追跡する攻撃手法。",
+      "description_en": "An attack technique sending tiny amounts of cryptocurrency to many addresses to track user behavior.",
+      "risk_level": "low",
+      "weight": 0.3,
+      "rules": [
+        {
+          "type": "transaction_amount",
+          "operator": "<=",
+          "threshold": 0.001,
+          "description": "極小額（0.001 ETH以下）"
+        },
+        {
+          "type": "unique_recipients",
+          "operator": ">=",
+          "threshold": 100,
+          "description": "100以上の異なるアドレスへ送信"
+        }
+      ],
+      "indicators": [
+        "Tiny amounts sent to many addresses",
+        "Uniform or similar amounts across recipients",
+        "Sender has no prior interaction with recipients",
+        "Possible privacy attack attempt"
+      ]
+    },
+    {
+      "id": "peel_chain",
+      "name": "Peel Chain (ピールチェーン)",
+      "name_ja": "ピールチェーン",
+      "name_en": "Peel Chain",
+      "description_ja": "大きな資金プールから少しずつ資金を剥ぎ取り、最終目的地へ送る手法。玉ねぎの皮を剥くように資金を分離。",
+      "description_en": "A technique to gradually peel off funds from a large pool and send to final destination, like peeling an onion.",
+      "risk_level": "high",
+      "weight": 0.8,
+      "rules": [
+        {
+          "type": "peel_pattern",
+          "operator": "=",
+          "threshold": true,
+          "description": "残高の一部を繰り返し送金"
+        },
+        {
+          "type": "peel_count",
+          "operator": ">=",
+          "threshold": 5,
+          "description": "5回以上のピール動作"
+        },
+        {
+          "type": "decreasing_balance",
+          "operator": "=",
+          "threshold": true,
+          "description": "残高が段階的に減少"
+        }
+      ],
+      "indicators": [
+        "Sequential transactions from same address",
+        "Each transaction peels off portion of balance",
+        "Change always returned to source",
+        "Pattern continues until balance depleted",
+        "Typical of exchange withdrawals or fund distribution"
+      ]
+    }
+  ],
+  "risk_weights": {
+    "critical": 1.0,
+    "high": 0.75,
+    "medium": 0.5,
+    "low": 0.25
+  },
+  "confidence_thresholds": {
+    "high": 0.8,
+    "medium": 0.6,
+    "low": 0.4
+  }
+}

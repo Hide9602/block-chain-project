@@ -1,0 +1,154 @@
+{
+  "templates": {
+    "ja": {
+      "opening": [
+        "{timestamp}、調査対象アドレス（{address}）において、注目すべき取引活動が確認されました。",
+        "{timestamp}、アドレス{address}から開始された一連の取引を分析した結果、以下の資金フローが特定されました。",
+        "対象アドレス{address}の取引履歴を分析したところ、{timestamp}を起点とする疑わしい資金移動パターンが検出されました。"
+      ],
+      "large_transfer": [
+        "総額{amount} {currency}（当時のレート換算で約{jpy_amount}円相当）が送金されました。",
+        "{amount} {currency}という大規模な資金が移動しています。",
+        "注目すべきは、{amount} {currency}という多額の資金転送です。"
+      ],
+      "layering": [
+        "この資金は{intermediary_count}つの中間ウォレット（{intermediaries}）にほぼ均等に分散されました。",
+        "資金は{intermediary_count}段階の中間アドレスを経由して移動しています。",
+        "複数の中間ウォレット（{intermediary_count}個）を通じた典型的なレイヤリング手法が確認されました。"
+      ],
+      "mixing": [
+        "その後{timeframe}以内にTornado Cash等のミキシングサービスを経由しています。",
+        "資金の一部は既知のミキシングサービス（{mixer_name}）を通じて匿名化されています。",
+        "ミキシングサービス{mixer_name}との取引が{transaction_count}件確認されました。"
+      ],
+      "rapid_movement": [
+        "特筆すべき点として、受取から{minutes}分以内という極めて短時間で次の転送が実行されています。",
+        "資金の受領後、わずか{minutes}分で別のアドレスへ転送される挙動が観察されました。",
+        "このアドレスは中継点として機能しており、受取後平均{minutes}分で資金を転送しています。"
+      ],
+      "smurfing": [
+        "{timeframe}の間に{transaction_count}件の小額取引が実行されました。各取引額は平均{avg_amount} {currency}と、報告義務を回避する典型的なスマーフィングパターンです。",
+        "多数の小額送金（{transaction_count}件、平均{avg_amount} {currency}）が短期間に集中しており、スマーフィング手法の可能性が高いと判断されます。"
+      ],
+      "circular": [
+        "注目すべきことに、資金は{hop_count}ホップを経て最終的に元のアドレスに戻ってきています。これは循環取引またはウォッシュトレーディングの可能性を示唆しています。",
+        "{timeframe}以内に資金が元のアドレスに還流する循環パターンが検出されました。"
+      ],
+      "risk_assessment": [
+        "この動きは典型的な{pattern_name}手法に該当し、資金源の隠蔽を目的とした{risk_level}リスク取引として評価されます。",
+        "検出されたパターンは{pattern_name}に分類され、信頼度{confidence}%で{risk_level}リスクと判定されます。",
+        "総合的なリスク評価の結果、このアドレスは{risk_level}リスク（スコア: {risk_score}/100）と評価されました。"
+      ],
+      "conclusion": [
+        "以上の分析結果から、このアドレスは継続的な監視と詳細な調査が必要と判断されます。",
+        "検出されたパターンの組み合わせから、マネーロンダリングまたは不正資金移動の可能性が示唆されます。",
+        "法執行機関への通報を含む、適切な対応措置の検討を推奨します。"
+      ],
+      "no_suspicious_activity": [
+        "分析の結果、現時点では顕著な疑わしい取引パターンは検出されませんでした。",
+        "通常の取引活動の範囲内と判断されます。ただし、継続的なモニタリングは推奨されます。"
+      ]
+    },
+    "en": {
+      "opening": [
+        "At {timestamp}, notable transaction activity was observed on the target address ({address}).",
+        "Analysis of transactions initiated from address {address} at {timestamp} revealed the following fund flow.",
+        "Investigation of the target address {address} detected suspicious fund movement patterns starting from {timestamp}."
+      ],
+      "large_transfer": [
+        "A total of {amount} {currency} (approximately ¥{jpy_amount} at the exchange rate at the time) was transferred.",
+        "A large sum of {amount} {currency} was moved.",
+        "Notably, a substantial fund transfer of {amount} {currency} was executed."
+      ],
+      "layering": [
+        "These funds were distributed almost evenly to {intermediary_count} intermediate wallets ({intermediaries}).",
+        "The funds moved through {intermediary_count} stages of intermediate addresses.",
+        "A typical layering technique through multiple intermediate wallets ({intermediary_count} addresses) was confirmed."
+      ],
+      "mixing": [
+        "Subsequently, within {timeframe}, the funds passed through mixing services such as Tornado Cash.",
+        "Part of the funds were anonymized through known mixing services ({mixer_name}).",
+        "{transaction_count} transactions with mixing service {mixer_name} were confirmed."
+      ],
+      "rapid_movement": [
+        "Notably, the next transfer was executed within an extremely short period of {minutes} minutes after receipt.",
+        "Behavior of transferring to another address within just {minutes} minutes after receiving funds was observed.",
+        "This address functions as a relay point, transferring funds on average {minutes} minutes after receipt."
+      ],
+      "smurfing": [
+        "During {timeframe}, {transaction_count} small transactions were executed. Each transaction averaged {avg_amount} {currency}, a typical smurfing pattern to avoid reporting requirements.",
+        "Numerous small transfers ({transaction_count} transactions, average {avg_amount} {currency}) concentrated in a short period, highly likely to be smurfing technique."
+      ],
+      "circular": [
+        "Notably, funds returned to the original address after {hop_count} hops. This suggests the possibility of circular trading or wash trading.",
+        "A circular pattern where funds returned to the original address within {timeframe} was detected."
+      ],
+      "risk_assessment": [
+        "This movement corresponds to a typical {pattern_name} technique and is evaluated as a {risk_level} risk transaction aimed at concealing fund sources.",
+        "The detected pattern is classified as {pattern_name} and determined to be {risk_level} risk with {confidence}% confidence.",
+        "As a result of comprehensive risk assessment, this address is evaluated as {risk_level} risk (score: {risk_score}/100)."
+      ],
+      "conclusion": [
+        "Based on the above analysis, this address requires continuous monitoring and detailed investigation.",
+        "The combination of detected patterns suggests the possibility of money laundering or illicit fund movement.",
+        "Consideration of appropriate response measures, including reporting to law enforcement, is recommended."
+      ],
+      "no_suspicious_activity": [
+        "As a result of analysis, no significant suspicious transaction patterns were detected at this time.",
+        "Judged to be within the range of normal transaction activity. However, continuous monitoring is recommended."
+      ]
+    }
+  },
+  "risk_level_translations": {
+    "ja": {
+      "critical": "極めて高い",
+      "high": "高い",
+      "medium": "中程度",
+      "low": "低い",
+      "minimal": "極めて低い"
+    },
+    "en": {
+      "critical": "critical",
+      "high": "high",
+      "medium": "medium",
+      "low": "low",
+      "minimal": "minimal"
+    }
+  },
+  "pattern_translations": {
+    "ja": {
+      "smurfing": "スマーフィング",
+      "layering": "レイヤリング",
+      "mixing": "ミキシング",
+      "structuring": "ストラクチャリング",
+      "circular_trading": "循環取引",
+      "rapid_movement": "急速移動",
+      "dusting": "ダスティング攻撃",
+      "peel_chain": "ピールチェーン"
+    },
+    "en": {
+      "smurfing": "smurfing",
+      "layering": "layering",
+      "mixing": "mixing",
+      "structuring": "structuring",
+      "circular_trading": "circular trading",
+      "rapid_movement": "rapid movement",
+      "dusting": "dusting attack",
+      "peel_chain": "peel chain"
+    }
+  },
+  "timeframe_translations": {
+    "ja": {
+      "minutes": "{value}分",
+      "hours": "{value}時間",
+      "days": "{value}日",
+      "weeks": "{value}週間"
+    },
+    "en": {
+      "minutes": "{value} minutes",
+      "hours": "{value} hours",
+      "days": "{value} days",
+      "weeks": "{value} weeks"
+    }
+  }
+}
