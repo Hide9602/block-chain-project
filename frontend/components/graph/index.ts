@@ -9,4 +9,5 @@ export { RiskClusterPanel } from './RiskClusterPanel';
 export { RiskAlertPanel } from './RiskAlertPanel';
 export { AddressWatchlist } from './AddressWatchlist';
 
+import { GraphVisualization } from './GraphVisualization';
 export default GraphVisualization;

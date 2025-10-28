@@ -169,19 +169,19 @@ export const AdvancedGraphVisualization: React.FC<AdvancedGraphVisualizationProp
         // Nodes
         ...filteredNodes.map((node) => ({
           data: {
+            ...node,
             id: node.id,
             label: showLabels ? (node.label || node.address.substring(0, 8) + '...') : '',
-            ...node,
           },
         })),
         // Edges
         ...filteredEdges.map((edge) => ({
           data: {
+            ...edge,
             id: edge.id,
             source: edge.source,
             target: edge.target,
             label: showLabels ? `${edge.amount.toFixed(2)} ETH` : '',
-            ...edge,
           },
         })),
       ],

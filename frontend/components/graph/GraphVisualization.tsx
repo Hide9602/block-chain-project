@@ -88,19 +88,19 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         // ノード
         ...nodes.map((node) => ({
           data: {
+            ...node,
             id: node.id,
             label: node.label || node.address.substring(0, 10) + '...',
-            ...node,
           },
         })),
         // エッジ
         ...edges.map((edge) => ({
           data: {
+            ...edge,
             id: edge.id,
             source: edge.source,
             target: edge.target,
             label: `${edge.amount} ETH`,
-            ...edge,
           },
         })),
       ],

@@ -8,7 +8,6 @@ const resources = {
     translation: {
       // Navigation
       home: 'Home',
-      investigation: 'Investigation',
       
       // Homepage
       hero: {
@@ -168,7 +167,6 @@ const resources = {
     translation: {
       // ナビゲーション
       home: 'ホーム',
-      investigation: '調査',
       
       // ホームページ
       hero: {
