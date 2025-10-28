@@ -8,6 +8,13 @@
 
 **デジタル犯罪対策の最前線で、AI技術と人間の創造性を融合**
 
+## 🚀 ワンクリックデプロイ
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2FHide9602%2Fblock-chain-project)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHide9602%2Fblock-chain-project&project-name=metasleuth-nextgen&root-directory=frontend)
+
+**5分でデプロイ完了！** 詳細は [DEPLOY_STEP_BY_STEP.md](./DEPLOY_STEP_BY_STEP.md) を参照
+
 ---
 
 ## 🎯 プロジェクト概要
