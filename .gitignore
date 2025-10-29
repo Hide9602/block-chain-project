@@ -10,7 +10,7 @@ __pycache__/
 
 # Build outputs
 frontend/.next/
-frontend/out/
+# frontend/out/  # Temporarily commented to deploy built files
 frontend/build/
 backend/dist/
 *.egg-info/
