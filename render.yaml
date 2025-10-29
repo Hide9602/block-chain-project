@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: metasleuth-nextgen-frontend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://your-backend-url.railway.app
