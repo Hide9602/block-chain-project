@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaSleuth NextGen - AI-Powered Blockchain Investigation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-screen">
+    <!-- ヘッダー -->
+    <header class="border-b border-gray-700 backdrop-blur-sm bg-gray-900/50 sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    MetaSleuth NextGen
+                </div>
+                <div class="flex gap-6">
+                    <button id="langToggle" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition">
+                        🌐 <span id="currentLang">日本語</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="container mx-auto px-6 py-12">
+        <!-- ヒーローセクション -->
+        <section class="text-center mb-16 fade-in">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                <span data-i18n="hero.title">AI駆動のブロックチェーン調査</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                <span data-i18n="hero.subtitle">最先端のAI技術による高度なパターン検出、リスク評価、トランザクション分析</span>
+            </p>
+            <div class="flex gap-4 justify-center flex-wrap">
+                <button onclick="scrollTo('#features')" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all transform hover:scale-105">
+                    <span data-i18n="hero.getStarted">今すぐ始める</span>
+                </button>
+                <button onclick="scrollTo('#demo')" class="px-8 py-4 bg-gray-800 border border-gray-700 rounded-lg font-semibold text-lg hover:bg-gray-700 transition">
+                    <span data-i18n="hero.viewDemo">デモを見る</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 機能カード -->
+        <section id="features" class="mb-16 fade-in">
+            <h2 class="text-4xl font-bold text-center mb-12">
+                <span data-i18n="features.title">主要機能</span>
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- カード1: パターン検出 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8 hover:border-blue-500 transition-all transform hover:scale-105">
+                    <div class="text-5xl mb-4">🔍</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.pattern.title">AIパターン検出</h3>
+                    <p class="text-gray-400 mb-6" data-i18n="features.pattern.description">機械学習アルゴリズムで不審な取引パターンを自動検出します。</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>✓ <span data-i18n="features.pattern.feature1">リアルタイム分析</span></li>
+                        <li>✓ <span data-i18n="features.pattern.feature2">複数チェーン対応</span></li>
+                        <li>✓ <span data-i18n="features.pattern.feature3">カスタムルール設定</span></li>
+                    </ul>
+                </div>
+
+                <!-- カード2: リスク評価 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8 hover:border-purple-500 transition-all transform hover:scale-105">
+                    <div class="text-5xl mb-4">⚠️</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.risk.title">リスク評価</h3>
+                    <p class="text-gray-400 mb-6" data-i18n="features.risk.description">包括的なリスクスコアリングシステムで潜在的な脅威を評価します。</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>✓ <span data-i18n="features.risk.feature1">多次元分析</span></li>
+                        <li>✓ <span data-i18n="features.risk.feature2">スコアリングシステム</span></li>
+                        <li>✓ <span data-i18n="features.risk.feature3">詳細レポート</span></li>
+                    </ul>
+                </div>
+
+                <!-- カード3: グラフ可視化 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8 hover:border-pink-500 transition-all transform hover:scale-105">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.graph.title">グラフ可視化</h3>
+                    <p class="text-gray-400 mb-6" data-i18n="features.graph.description">インタラクティブなグラフで取引の流れを直感的に理解できます。</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>✓ <span data-i18n="features.graph.feature1">3D/2Dビュー</span></li>
+                        <li>✓ <span data-i18n="features.graph.feature2">フィルタリング機能</span></li>
+                        <li>✓ <span data-i18n="features.graph.feature3">エクスポート対応</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- デモセクション -->
+        <section id="demo" class="mb-16 fade-in bg-gray-800/30 backdrop-blur-sm border border-gray-700 rounded-xl p-12">
+            <h2 class="text-4xl font-bold text-center mb-8">
+                <span data-i18n="demo.title">デモ画面</span>
+            </h2>
+            <div class="bg-gray-900 rounded-lg p-8 border border-gray-700">
+                <div class="flex items-center gap-4 mb-6">
+                    <input 
+                        type="text" 
+                        placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+                        class="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                        id="addressInput"
+                    >
+                    <button onclick="analyzeAddress()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition">
+                        <span data-i18n="demo.analyze">分析開始</span>
+                    </button>
+                </div>
+                <div id="result" class="hidden">
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            <div class="text-sm text-gray-400 mb-2" data-i18n="demo.riskLevel">リスクレベル</div>
+                            <div class="text-2xl font-bold text-yellow-500">中リスク</div>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            <div class="text-sm text-gray-400 mb-2" data-i18n="demo.transactions">取引数</div>
+                            <div class="text-2xl font-bold text-blue-400">1,234</div>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            <div class="text-sm text-gray-400 mb-2" data-i18n="demo.patterns">検出パターン</div>
+                            <div class="text-2xl font-bold text-purple-400">5</div>
+                        </div>
+                    </div>
+                    <div class="bg-green-900/20 border border-green-700 rounded-lg p-4 text-green-300">
+                        <strong data-i18n="demo.success">✓ 分析完了！</strong>
+                        <span data-i18n="demo.successMessage">詳細レポートが生成されました。</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 統計セクション -->
+        <section class="mb-16 fade-in">
+            <div class="grid md:grid-cols-4 gap-6 text-center">
+                <div>
+                    <div class="text-4xl font-bold text-blue-400 mb-2">10M+</div>
+                    <div class="text-gray-400" data-i18n="stats.transactions">分析済み取引</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-purple-400 mb-2">50K+</div>
+                    <div class="text-gray-400" data-i18n="stats.addresses">追跡アドレス</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-pink-400 mb-2">99.9%</div>
+                    <div class="text-gray-400" data-i18n="stats.accuracy">検出精度</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-green-400 mb-2">24/7</div>
+                    <div class="text-gray-400" data-i18n="stats.monitoring">リアルタイム監視</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="border-t border-gray-700 py-8 bg-gray-900/50 backdrop-blur-sm">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p>&copy; 2024 MetaSleuth NextGen. All rights reserved.</p>
+            <p class="mt-2 text-sm">
+                <span data-i18n="footer.tagline">AI駆動のブロックチェーンセキュリティプラットフォーム</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 多言語対応
+        const translations = {
+            ja: {
+                "hero.title": "AI駆動のブロックチェーン調査",
+                "hero.subtitle": "最先端のAI技術による高度なパターン検出、リスク評価、トランザクション分析",
+                "hero.getStarted": "今すぐ始める",
+                "hero.viewDemo": "デモを見る",
+                "features.title": "主要機能",
+                "features.pattern.title": "AIパターン検出",
+                "features.pattern.description": "機械学習アルゴリズムで不審な取引パターンを自動検出します。",
+                "features.pattern.feature1": "リアルタイム分析",
+                "features.pattern.feature2": "複数チェーン対応",
+                "features.pattern.feature3": "カスタムルール設定",
+                "features.risk.title": "リスク評価",
+                "features.risk.description": "包括的なリスクスコアリングシステムで潜在的な脅威を評価します。",
+                "features.risk.feature1": "多次元分析",
+                "features.risk.feature2": "スコアリングシステム",
+                "features.risk.feature3": "詳細レポート",
+                "features.graph.title": "グラフ可視化",
+                "features.graph.description": "インタラクティブなグラフで取引の流れを直感的に理解できます。",
+                "features.graph.feature1": "3D/2Dビュー",
+                "features.graph.feature2": "フィルタリング機能",
+                "features.graph.feature3": "エクスポート対応",
+                "demo.title": "デモ画面",
+                "demo.analyze": "分析開始",
+                "demo.riskLevel": "リスクレベル",
+                "demo.transactions": "取引数",
+                "demo.patterns": "検出パターン",
+                "demo.success": "✓ 分析完了！",
+                "demo.successMessage": "詳細レポートが生成されました。",
+                "stats.transactions": "分析済み取引",
+                "stats.addresses": "追跡アドレス",
+                "stats.accuracy": "検出精度",
+                "stats.monitoring": "リアルタイム監視",
+                "footer.tagline": "AI駆動のブロックチェーンセキュリティプラットフォーム"
+            },
+            en: {
+                "hero.title": "AI-Powered Blockchain Investigation",
+                "hero.subtitle": "Advanced pattern detection, risk assessment, and transaction analysis powered by cutting-edge AI technology",
+                "hero.getStarted": "Get Started",
+                "hero.viewDemo": "View Demo",
+                "features.title": "Key Features",
+                "features.pattern.title": "AI Pattern Detection",
+                "features.pattern.description": "Automatically detect suspicious transaction patterns with machine learning algorithms.",
+                "features.pattern.feature1": "Real-time Analysis",
+                "features.pattern.feature2": "Multi-chain Support",
+                "features.pattern.feature3": "Custom Rule Settings",
+                "features.risk.title": "Risk Assessment",
+                "features.risk.description": "Evaluate potential threats with comprehensive risk scoring system.",
+                "features.risk.feature1": "Multi-dimensional Analysis",
+                "features.risk.feature2": "Scoring System",
+                "features.risk.feature3": "Detailed Reports",
+                "features.graph.title": "Graph Visualization",
+                "features.graph.description": "Intuitively understand transaction flows with interactive graphs.",
+                "features.graph.feature1": "3D/2D Views",
+                "features.graph.feature2": "Filtering Features",
+                "features.graph.feature3": "Export Support",
+                "demo.title": "Demo",
+                "demo.analyze": "Analyze",
+                "demo.riskLevel": "Risk Level",
+                "demo.transactions": "Transactions",
+                "demo.patterns": "Detected Patterns",
+                "demo.success": "✓ Analysis Complete!",
+                "demo.successMessage": "Detailed report has been generated.",
+                "stats.transactions": "Analyzed Transactions",
+                "stats.addresses": "Tracked Addresses",
+                "stats.accuracy": "Detection Accuracy",
+                "stats.monitoring": "Real-time Monitoring",
+                "footer.tagline": "AI-Powered Blockchain Security Platform"
+            }
+        };
+
+        let currentLang = 'ja';
+
+        function updateLanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                element.textContent = translations[currentLang][key];
+            });
+            document.getElementById('currentLang').textContent = currentLang === 'ja' ? '日本語' : 'English';
+        }
+
+        document.getElementById('langToggle').addEventListener('click', () => {
+            currentLang = currentLang === 'ja' ? 'en' : 'ja';
+            updateLanguage();
+        });
+
+        function scrollTo(selector) {
+            document.querySelector(selector).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function analyzeAddress() {
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        // 初期化
+        updateLanguage();
+    </script>
+</body>
+</html>
