@@ -2,6 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  output: 'export',
+  distDir: '.next',
+  images: {
+    unoptimized: true,
+  },
   
   // 環境変数
   env: {
@@ -10,11 +15,7 @@ const nextConfig = {
     NEXT_PUBLIC_APP_VERSION: '1.0.0',
   },
 
-  // 画像最適化
-  images: {
-    domains: ['localhost', 'metasleuth-nextgen.com'],
-    formats: ['image/avif', 'image/webp'],
-  },
+
 
   // ヘッダー設定
   async headers() {
